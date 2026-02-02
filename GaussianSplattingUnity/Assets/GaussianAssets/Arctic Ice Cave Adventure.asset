@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33b71fae31e6c7d438e8566dc713e666, type: 3}
+  m_Name: Arctic Ice Cave Adventure
+  m_EditorClassIdentifier: GaussianSplatting::GaussianSplatting.Runtime.GaussianSplatAsset
+  m_FormatVersion: 20231020
+  m_SplatCount: 2000000
+  m_BoundsMin: {x: -22.046875, y: -12.3984375, z: -21.09375}
+  m_BoundsMax: {x: 27.671875, y: 16.84375, z: 25.90625}
+  m_DataHash:
+    serializedVersion: 2
+    Hash: efe5a220e34e6ff5e52cfb19bbdfb359
+  m_PosFormat: 2
+  m_ScaleFormat: 2
+  m_SHFormat: 3
+  m_ColorFormat: 2
+  m_PosData: {fileID: 4900000, guid: 8ee0e58d4ad267c42baea71f95d95bfb, type: 3}
+  m_ColorData: {fileID: 4900000, guid: 949e3e74e34656140b8b5ab5666b9186, type: 3}
+  m_OtherData: {fileID: 4900000, guid: 93852a38d04de9c4187dc018aa558d96, type: 3}
+  m_SHData: {fileID: 4900000, guid: 0f54411c5c6b4ef449a63f956f3d07be, type: 3}
+  m_ChunkData: {fileID: 4900000, guid: 398de38d63f56ee48ae89e533625c7de, type: 3}
+  m_Cameras: []
