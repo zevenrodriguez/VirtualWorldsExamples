@@ -11,7 +11,7 @@
     },
     "com.unity.burst": {
       "version": "1.8.27",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.mathematics": "1.2.1",
@@ -28,7 +28,7 @@
     },
     "com.unity.collections": {
       "version": "2.6.2",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.burst": "1.8.23",
@@ -96,7 +96,7 @@
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.6",
-      "depth": 3,
+      "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -161,7 +161,7 @@
     },
     "com.unity.test-framework.performance": {
       "version": "3.2.0",
-      "depth": 3,
+      "depth": 2,
       "source": "registry",
       "dependencies": {
         "com.unity.test-framework": "1.1.33",
@@ -314,6 +314,16 @@
         "com.unity.xr.legacyinputhelpers": "2.1.2"
       },
       "url": "https://packages.unity.com"
+    },
+    "org.nesnausk.gaussian-splatting": {
+      "version": "file:C:/Users/z.rodriguez2/Downloads/UnityGaussianSplatting-1.1.1/UnityGaussianSplatting-1.1.1/package",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.unity.burst": "1.8.8",
+        "com.unity.collections": "2.1.4",
+        "com.unity.mathematics": "1.2.6"
+      }
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
