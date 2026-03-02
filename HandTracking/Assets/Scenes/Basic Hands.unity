@@ -864,6 +864,7 @@ GameObject:
   - component: {fileID: 1656317692}
   - component: {fileID: 1656317691}
   - component: {fileID: 1656317690}
+  - component: {fileID: 1656317697}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -941,7 +942,19 @@ MonoBehaviour:
   m_AllowGazeAssistance: 0
   m_FirstHoverEntered:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1656317697}
+        m_TargetAssemblyTypeName: PokeDebug, Assembly-CSharp
+        m_MethodName: Log
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Hover
+          m_BoolArgument: 0
+        m_CallState: 2
   m_LastHoverExited:
     m_PersistentCalls:
       m_Calls: []
@@ -1005,8 +1018,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1.582122, z: 1}
-  m_Center: {x: 0, y: 0.2910611, z: 0}
+  m_Size: {x: 1, y: 0.20802891, z: 1}
+  m_Center: {x: 0, y: 0.578399, z: 0}
 --- !u!23 &1656317694
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1080,6 +1093,18 @@ Transform:
   - {fileID: 1219347370}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1656317697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656317689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0b2233a74ab9ed48abe1cfb76cbc0e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PokeDebug
 --- !u!1001 &1682336086
 PrefabInstance:
   m_ObjectHideFlags: 0
