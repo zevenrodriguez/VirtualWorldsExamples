@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "handtracking.slnx"
+    "dotnet.defaultSolution": "HandTracking.slnx"
 }

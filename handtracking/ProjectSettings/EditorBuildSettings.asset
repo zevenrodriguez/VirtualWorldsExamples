@@ -6,12 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/GettingStarted.unity
-    guid: 9403bc4ecda50fa42b25a55e0c4f8df8
+    path: Assets/Scenes/Basic Hands.unity
+    guid: 8060d2b5c45531940b0138f0fd8394a9
   m_configObjects:
-    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 26d51a1795d95df4e979e5d6db6b807b, type: 2}
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: ab67d285272846947884fb271b396126, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 1962cc242cac9254681488d5646036ef, type: 2}
-    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 79d8486f449d0914c878af034d9664d2, type: 2}
-    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 1e48ab70dae45a146bca40fc250cde0d, type: 2}
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: a91edb467229167459c2e13bcfbf2271, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 47f7a7056056a5e45a92705d26bb2a55, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: e7e980c87465b9b478f40aabc65657cf, type: 2}
   m_UseUCBPForAssetBundles: 0
