@@ -1,123 +1,97 @@
-#pragma import (XRRays, trackHover, RaycastObjects, ToggleObjects, togglePanel)
+#pragma import (makeRayLine, updateRayLine, trackHover, RaycastObjects, ToggleObjects, togglePanel)
 #pragma lifecycle(startup, update, dispose)
 
-// Track hover state for left and right controllers
+let XRButtonTrigger = 1;
+
+const targetCube = RaycastObjects.get("cube");
+const cubePanelUI = ToggleObjects.get("cubeText");
+
+// ─── Ray Lines ────────────────────────────────────────────────────────────────
+let leftRay = null;
+let rightRay = null;
+
+// ─── Controllers ──────────────────────────────────────────────────────────────
+const controllers = { left: null, right: null, leftIndex: -1, rightIndex: -1 };
+
+// ─── Hover State ──────────────────────────────────────────────────────────────
 let leftControllerHoverState = new Map();
 let rightControllerHoverState = new Map();
 
-// Track if buttons are pressed
+// ─── Button State ─────────────────────────────────────────────────────────────
 let leftButtonPressed = false;
 let rightButtonPressed = false;
 
-let XRButtonTrigger = 1; // Assuming trigger is button index 1, adjust if needed
-
-/**
- * Called once when the system starts.
- * Initialize XR input and create ray visualizations.
- */
-
- // Get the cube object to interact with
-    const targetCube = RaycastObjects.get("cube");
-    const cubePanelUI = ToggleObjects.get("cubeText");
-
-
 function startup() {
-    // Start XR input system
     Input.xr.start();
 
-    // Create the ray visualizations
-    XRRays.startup();
+    leftRay = makeRayLine(0x0000FF);
+    rightRay = makeRayLine(0xFF0000);
 }
 
-/**
- * Called every frame to update XR interactions.
- * Updates ray visualizations and checks for hover/click events.
- */
-function update(delta,time) {
-    // Update the ray visualizations
-    XRRays.update();
+function update(delta, time) {
+    if (Input.xr.count() < 1) return;
 
-   
+    controllers.left = null;
+    controllers.right = null;
 
-          // ─── Left Controller ───────────────────────────────────────────────────────
-        const leftRaycast = Input.xr.raycast(0);
+    for (let i = 0; i < Input.xr.count(); i++) {
+        const raycast = Input.xr.raycast(i);
+        const hand = Input.xr.handedness(i);
 
-        // Track hover state on left controller
+        if (hand === 'left') { controllers.left = raycast; controllers.leftIndex = i; updateRayLine(leftRay, raycast); }
+        if (hand === 'right') { controllers.right = raycast; controllers.rightIndex = i; updateRayLine(rightRay, raycast); }
+    }
+
+    // ─── Left Controller ───────────────────────────────────────────────────────
+    if (controllers.left) {
+        controllers.left.raycaster.ray.origin.copy(controllers.left.position);
+        controllers.left.raycaster.ray.direction.copy(controllers.left.direction).normalize();
         trackHover(
-            leftRaycast,
+            controllers.left,
             targetCube,
-            // onEnter callback
-            (hit) => {
-                console.log("Left controller hovering");
-            },
-            // onHover callback
-            (hit) => {
-                // Called every frame while hovering
-            },
-            // onExit callback
-            (hit) => {
-                console.log("Left controller stopped hovering");
-            },
+            (_hit) => { console.log("Left controller hover entered"); },
+            (_hit) => {},
+            (_hit) => { console.log("Left controller hover exited"); },
             leftControllerHoverState
         );
 
-        // Toggle UI panel on left trigger press
-        if (Input.xr.isButtonPressed(0, XRButtonTrigger) && !leftButtonPressed) {
+        if (Input.xr.isButtonPressed(controllers.leftIndex, XRButtonTrigger) && !leftButtonPressed) {
             togglePanel(cubePanelUI);
             leftButtonPressed = true;
         }
 
-        // Reset button flag when released
-        if (Input.xr.isButtonReleased(0, XRButtonTrigger)) {
+        if (Input.xr.isButtonReleased(controllers.leftIndex, XRButtonTrigger)) {
             leftButtonPressed = false;
         }
+    }
 
-        // ─── Right Controller ──────────────────────────────────────────────────────
-        const rightRaycast = Input.xr.raycast(1);
-
-        // Track hover state on right controller
+    // ─── Right Controller ──────────────────────────────────────────────────────
+    if (controllers.right) {
+        controllers.right.raycaster.ray.origin.copy(controllers.right.position);
+        controllers.right.raycaster.ray.direction.copy(controllers.right.direction).normalize();
         trackHover(
-            rightRaycast,
+            controllers.right,
             targetCube,
-            // onEnter callback
-            (hit) => {
-                console.log("Right controller hovering");
-            },
-            // onHover callback
-            (hit) => {
-                // Called every frame while hovering
-            },
-            // onExit callback
-            (hit) => {
-                console.log("Right controller stopped hovering");
-            },
+            (_hit) => { console.log("Right controller hover entered"); },
+            (_hit) => {},
+            (_hit) => { console.log("Right controller hover exited"); },
             rightControllerHoverState
         );
 
-        // Toggle UI panel on right trigger press
-        if (Input.xr.isButtonPressed(1, XRButtonTrigger) && !rightButtonPressed) {
+        if (Input.xr.isButtonPressed(controllers.rightIndex, XRButtonTrigger) && !rightButtonPressed) {
             togglePanel(cubePanelUI);
             rightButtonPressed = true;
         }
 
-        // Reset button flag when released
-        if (Input.xr.isButtonReleased(1, XRButtonTrigger)) {
+        if (Input.xr.isButtonReleased(controllers.rightIndex, XRButtonTrigger)) {
             rightButtonPressed = false;
         }
-    
+    }
 }
 
-/**
- * Called when the system shuts down.
- * Clean up XR input and remove ray visualizations.
- */
 function dispose() {
-    // Clean up ray visualizations
-    XRRays.dispose();
-
-    // Stop XR input system
     Input.xr.stop();
+
+    if (leftRay?.line) scene?.remove(leftRay.line);
+    if (rightRay?.line) scene?.remove(rightRay.line);
 }
-
-#pragma export (startup, update, dispose);
-
