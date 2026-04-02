@@ -94,17 +94,46 @@ function MudText(options) {
 
     // ── Private draw ─────────────────────────────────────────────────────────
     function draw(bgColor, borderColor) {
-        const bw = opts.borderWidth;
-        const r  = opts.borderRadius;
+        const bw      = opts.borderWidth;
+        const r       = opts.borderRadius;
+        const padding = bw + 16;
+
         ctx.clearRect(0, 0, canvasW, canvasH);
         _roundRect(ctx, bw / 2, bw / 2, canvasW - bw, canvasH - bw, r, bgColor, borderColor, bw);
-        ctx.fillStyle    = opts.textColor;
-        ctx.font         = `${opts.fontSize}px ${opts.fontFamily}`;
-        ctx.textAlign    = 'center';
+
+        ctx.fillStyle = opts.textColor;
+        ctx.font      = `${opts.fontSize}px ${opts.fontFamily}`;
+        ctx.textAlign = 'center';
+
+        // ── Word wrap ────────────────────────────────────────────────────────
+        const maxWidth   = canvasW - padding * 2;
+        const lineHeight = opts.fontSize * 1.2;
+        const words      = opts.text.split(' ');
+        const lines      = [];
+        let   current    = '';
+
+        for (let i = 0; i < words.length; i++) {
+            const test = current ? current + ' ' + words[i] : words[i];
+            if (ctx.measureText(test).width > maxWidth && current) {
+                lines.push(current);
+                current = words[i];
+            } else {
+                current = test;
+            }
+        }
+        if (current) lines.push(current);
+
+        // Draw lines centered vertically
+        const totalH  = lines.length * lineHeight;
+        const startY  = (canvasH - totalH) / 2 + lineHeight / 2;
+
         ctx.textBaseline = 'middle';
-        ctx.fillText(opts.text, canvasW / 2, canvasH / 2);
-        texture.needsUpdate          = true;
-        mesh.material.needsUpdate    = true;
+        for (let i = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], canvasW / 2, startY + i * lineHeight);
+        }
+
+        texture.needsUpdate       = true;
+        mesh.material.needsUpdate = true;
     }
 
     // ── Public API ────────────────────────────────────────────────────────────

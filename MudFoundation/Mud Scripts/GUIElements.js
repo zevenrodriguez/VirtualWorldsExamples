@@ -3,7 +3,7 @@
 // ─── Create GUI elements ──────────────────────────────────────────────────────
 const statusLabel = MudText({
     sceneMesh:       cast(scene.getObjectByName("statusLabel"), THREE.Mesh),
-    text:            'Select a material',
+    text:            'This is a MudText Box. This is a MudText Box. This is a MudText Box.',
     textColor:       '#ffffff',
     backgroundColor: '#111111',
     borderColor:     '#444444',
@@ -11,7 +11,7 @@ const statusLabel = MudText({
 
 const actionButton = MudButton({
     sceneMesh:            cast(scene.getObjectByName("actionButton"), THREE.Mesh),
-    text:                 'Apply Material',
+    text:                 'Hello!',
     textColor:            '#ffffff',
     backgroundColor:      '#2255cc',
     hoverBackgroundColor: '#4477ff',
@@ -22,7 +22,7 @@ const actionButton = MudButton({
 // ─── Info panel (hidden by default) ──────────────────────────────────────────
 const infoPanel = MudText({
     sceneMesh:       cast(scene.getObjectByName("infoPanel"), THREE.Mesh),
-    text:            'Hello from MudGUI!',
+    text:            'Hello from MudGUI! Hello from MudGUI! Hello from MudGUI! Hello from MudGUI! ',
     textColor:       '#ffffff',
     backgroundColor: '#1a3a1a',
     borderColor:     '#44aa44',

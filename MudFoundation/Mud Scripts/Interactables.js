@@ -1,3 +1,5 @@
+#pragma import (togglePanel);
+
 /*
  * Interactable Objects Module
  *
@@ -8,18 +10,16 @@
  */
 
 
+// ─── Store Objects in Maps ───────────────────────────────────────────────────
+// Maps are like dictionaries - they store key-value pairs
+// We store the objects so other modules can get them by name
+
+
 // ─── Get Objects from the Scene ───────────────────────────────────────────────
 // Find the 3D objects (things you can click/interact with)
 const cube = cast(scene.getObjectByName("cube"), THREE.Object3D);
 const sphere = cast(scene.getObjectByName("sphere"), THREE.Object3D);
 
-// Find the UI panels (text displays that show/hide)
-const cubeTextPanel = cast(scene.getObjectByName("cubeText"), THREE.Object3D);
-const sphereTextPanel = cast(scene.getObjectByName("sphereText"), THREE.Object3D);
-
-// ─── Store Objects in Maps ───────────────────────────────────────────────────
-// Maps are like dictionaries - they store key-value pairs
-// We store the objects so other modules can get them by name
 
 /**
  * Map of clickable/raycastable objects
@@ -29,6 +29,11 @@ const RaycastObjects = new Map();
 RaycastObjects.set("cube", cube);
 RaycastObjects.set("sphere", sphere);
 
+
+// Find the UI panels (text displays that show/hide)
+const cubeTextPanel = cast(scene.getObjectByName("cubeText"), THREE.Object3D);
+const sphereTextPanel = cast(scene.getObjectByName("sphereText"), THREE.Object3D);
+
 /**
  * Map of UI panels that can be toggled on/off
  * Access with: ToggleObjects.get("cubeText") or ToggleObjects.get("sphereText")
@@ -37,20 +42,12 @@ const ToggleObjects = new Map();
 ToggleObjects.set("cubeText", cubeTextPanel);
 ToggleObjects.set("sphereText", sphereTextPanel);
 
-// ─── Toggle Function ──────────────────────────────────────────────────────────
-/**
- * Show or hide a UI panel (toggle its visibility).
- *
- * @param {THREE.Object3D} panelObject - The object to show/hide
- */
-function togglePanel(panelObject) {
-    panelObject.visible = !panelObject.visible;  // Flip true to false, false to true
-}
+
 
 // ─── Initialize ──────────────────────────────────────────────────────────────
 // Hide the text panels when the scene starts
 togglePanel(cubeTextPanel);
 togglePanel(sphereTextPanel);
 
-#pragma export (RaycastObjects, ToggleObjects, togglePanel);
+#pragma export (RaycastObjects, ToggleObjects);
 

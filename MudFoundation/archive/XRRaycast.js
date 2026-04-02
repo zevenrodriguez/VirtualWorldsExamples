@@ -1,7 +1,6 @@
-#pragma import (makeRayLine, updateRayLine, trackHover, RaycastObjects, ToggleObjects, togglePanel)
+#pragma import (makeRayLine, updateRayLine, RayInteractor, RaycastObjects, ToggleObjects, togglePanel)
 #pragma lifecycle(startup, update, dispose)
 
-let XRButtonTrigger = 1;
 
 const targetCube = RaycastObjects.get("cube");
 const cubePanelUI = ToggleObjects.get("cubeText");
@@ -17,9 +16,6 @@ const controllers = { left: null, right: null, leftIndex: -1, rightIndex: -1 };
 let leftControllerHoverState = new Map();
 let rightControllerHoverState = new Map();
 
-// ─── Button State ─────────────────────────────────────────────────────────────
-let leftButtonPressed = false;
-let rightButtonPressed = false;
 
 function startup() {
     Input.xr.start();
@@ -46,46 +42,34 @@ function update(delta, time) {
     if (controllers.left) {
         controllers.left.raycaster.ray.origin.copy(controllers.left.position);
         controllers.left.raycaster.ray.direction.copy(controllers.left.direction).normalize();
-        trackHover(
+        RayInteractor(
             controllers.left,
-            targetCube,
-            (_hit) => { console.log("Left controller hover entered"); },
-            (_hit) => {},
-            (_hit) => { console.log("Left controller hover exited"); },
+            () => Input.xr.isButtonPressed(controllers.leftIndex, 1),   // returns true while trigger is held
+            () => Input.xr.isButtonReleased(controllers.leftIndex, 1),  // returns true the frame trigger is released
+            RaycastObjects.get("cube"),
+            (_hit) => { console.log("Left controller hover entered"); }, // ray just started hitting the cube
+            (_hit) => {  },                                              // ray is hovering over the cube every frame
+            (_hit) => { console.log("Left controller hover exited"); },  // ray stopped hitting the cube
+            () => { togglePanel(ToggleObjects.get("cubeText")); },       // trigger pressed and released while hovering — toggle the panel
             leftControllerHoverState
         );
-
-        if (Input.xr.isButtonPressed(controllers.leftIndex, XRButtonTrigger) && !leftButtonPressed) {
-            togglePanel(cubePanelUI);
-            leftButtonPressed = true;
-        }
-
-        if (Input.xr.isButtonReleased(controllers.leftIndex, XRButtonTrigger)) {
-            leftButtonPressed = false;
-        }
     }
 
     // ─── Right Controller ──────────────────────────────────────────────────────
     if (controllers.right) {
         controllers.right.raycaster.ray.origin.copy(controllers.right.position);
         controllers.right.raycaster.ray.direction.copy(controllers.right.direction).normalize();
-        trackHover(
+        RayInteractor(
             controllers.right,
-            targetCube,
-            (_hit) => { console.log("Right controller hover entered"); },
-            (_hit) => {},
-            (_hit) => { console.log("Right controller hover exited"); },
+            () => Input.xr.isButtonPressed(controllers.rightIndex, 1),   // returns true while trigger is held
+            () => Input.xr.isButtonReleased(controllers.rightIndex, 1),  // returns true the frame trigger is released
+            RaycastObjects.get("cube"),
+            (_hit) => { console.log("Right controller hover entered"); }, // ray just started hitting the cube
+            (_hit) => { },                                                // ray is hovering over the cube every frame
+            (_hit) => { console.log("Right controller hover exited"); },  // ray stopped hitting the cube
+            () => { togglePanel(ToggleObjects.get("cubeText")); },        // trigger pressed and released while hovering — toggle the panel
             rightControllerHoverState
         );
-
-        if (Input.xr.isButtonPressed(controllers.rightIndex, XRButtonTrigger) && !rightButtonPressed) {
-            togglePanel(cubePanelUI);
-            rightButtonPressed = true;
-        }
-
-        if (Input.xr.isButtonReleased(controllers.rightIndex, XRButtonTrigger)) {
-            rightButtonPressed = false;
-        }
     }
 }
 

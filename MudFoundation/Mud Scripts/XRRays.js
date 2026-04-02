@@ -28,6 +28,10 @@ function makeRayLine(color = 0x0000ff, length = RAY_LENGTH) {
 function updateRayLine(rayLine, raycast) {
     if (!rayLine || !raycast) return;
 
+    // Keep the raycaster in sync so intersectObject works correctly
+    raycast.raycaster.ray.origin.copy(raycast.position);
+    raycast.raycaster.ray.direction.copy(raycast.direction).normalize();
+
     rayEndPosition
         .copy(raycast.direction)
         .normalize()
