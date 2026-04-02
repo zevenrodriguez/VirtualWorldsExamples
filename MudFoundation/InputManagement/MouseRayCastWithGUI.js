@@ -1,58 +1,21 @@
-#pragma import (MudText, MudButton, RayInteractor, RaycastObjects, ToggleObjects, togglePanel)
+#pragma import (RayInteractor, RaycastObjects, ToggleObjects, togglePanel, GUIElements)
 #pragma lifecycle(startup, update, dispose)
 
-const domElement = renderer.domElement;
+const domElement   = renderer.domElement;
+const actionButton = GUIElements.get("actionButton");
+const infoPanel    = GUIElements.get("infoPanel");
 
-// ─── Scene object interactors ─────────────────────────────────────────────────
+// ─── Cube interactor ──────────────────────────────────────────────────────────
 const cubeInteractor = new RayInteractor(RaycastObjects.get("cube"));
 
 cubeInteractor.onEnter = (_hit) => { domElement.style.cursor = 'pointer'; };
 cubeInteractor.onExit  = (_hit) => { domElement.style.cursor = 'default'; };
 cubeInteractor.onClick = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
 
-// ─── GUI Elements ─────────────────────────────────────────────────────────────
-// Place two flat planes in the MUD scene editor named "statusLabel" and "actionButton"
-
-const statusLabel = MudText({
-    sceneMesh:       cast(scene.getObjectByName("statusLabel"), THREE.Mesh),
-    text:            'Status: idle',
-    textColor:       '#ffffff',
-    backgroundColor: '#111111',
-    borderColor:     '#444444',
-});
-
-const actionButton = MudButton({
-    sceneMesh:            cast(scene.getObjectByName("actionButton"), THREE.Mesh),
-    text:                 'Click Me',
-    textColor:            '#ffffff',
-    backgroundColor:      '#2255cc',
-    hoverBackgroundColor: '#4477ff',
-    borderColor:          '#99bbff',
-    hoverBorderColor:     '#ffffff',
-});
-
-// ─── Button callback ──────────────────────────────────────────────────────────
-let clickCount = 0;
-
-actionButton.onClick = (_hit) => {
-    clickCount++;
-    statusLabel.setText(`Clicked: ${clickCount}`);
-    console.log('Button clicked', clickCount);
-};
-
-// ─── Cursor feedback on button hover ─────────────────────────────────────────
-const _btnEnter = actionButton._interactor.onEnter;
-const _btnExit  = actionButton._interactor.onExit;
-
-actionButton._interactor.onEnter = (hit) => {
-    domElement.style.cursor = 'pointer';
-    _btnEnter(hit);
-};
-
-actionButton._interactor.onExit = (hit) => {
-    domElement.style.cursor = 'default';
-    _btnExit(hit);
-};
+// ─── Button interactor ────────────────────────────────────────────────────────
+actionButton._interactor.onEnter = (_hit) => { actionButton.hover();   domElement.style.cursor = 'pointer'; };
+actionButton._interactor.onExit  = (_hit) => { actionButton.unhover(); domElement.style.cursor = 'default'; };
+actionButton.onClick             = (_hit) => { infoPanel.mesh.visible = !infoPanel.mesh.visible; };
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 function startup() {

@@ -56,12 +56,21 @@ function MudText(options) {
     // ── Resolve mesh + dimensions ─────────────────────────────────────────────
     let mesh;
     if (opts.sceneMesh) {
-        mesh = opts.sceneMesh;
-        const box  = new THREE.Box3().setFromObject(mesh);
+        const ref  = opts.sceneMesh;
+        const box  = new THREE.Box3().setFromObject(ref);
         const size = new THREE.Vector3();
         box.getSize(size);
         opts.width  = size.x || opts.width;
         opts.height = size.y || opts.height;
+
+        // Hide the reference primitive — it was only there for placement
+        ref.visible = false;
+
+        // Create a fresh plane at the reference's world position/rotation
+        mesh = new THREE.Mesh(new THREE.PlaneGeometry(opts.width, opts.height), null);
+        ref.getWorldPosition(mesh.position);
+        ref.getWorldQuaternion(mesh.quaternion);
+        scene.add(mesh);
     } else {
         mesh = new THREE.Mesh(new THREE.PlaneGeometry(opts.width, opts.height), null);
     }
@@ -75,10 +84,12 @@ function MudText(options) {
     canvas.height = canvasH;
     const ctx     = canvas.getContext('2d');
     const texture = new THREE.CanvasTexture(canvas);
+    if (THREE.SRGBColorSpace !== undefined) texture.colorSpace = THREE.SRGBColorSpace;
 
     mesh.material = new THREE.MeshBasicMaterial({
-        map:  texture,
-        side: THREE.DoubleSide,
+        map:         texture,
+        side:        THREE.DoubleSide,
+        transparent: true,
     });
 
     // ── Private draw ─────────────────────────────────────────────────────────
@@ -92,7 +103,8 @@ function MudText(options) {
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(opts.text, canvasW / 2, canvasH / 2);
-        texture.needsUpdate = true;
+        texture.needsUpdate          = true;
+        mesh.material.needsUpdate    = true;
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -145,6 +157,8 @@ function MudButton(options) {
         setText:     base.setText,
         onClick:     function() {},
         _interactor: interactor,
+        hover:   function() { base._draw(hoverBg,   hoverBorder);  },
+        unhover: function() { base._draw(normalBg,  normalBorder); },
         update: function(raycast, isPressed, isReleased) {
             interactor.update(raycast, isPressed, isReleased);
         },

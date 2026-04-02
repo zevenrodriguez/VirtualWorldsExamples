@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/Code/VirtualWorldsExamples/MudFoundation -type f -name \"*.js\" -exec grep -l \"pragma\\\\|directive\\\\|framework\\\\|MUD\" {} \\\\;)",
+      "Bash(grep -E \"\\(//|/\\\\*|\\\\*\\)\")",
+      "WebFetch(domain:docs.mud.foundation)",
+      "WebSearch"
+    ]
+  }
+}
