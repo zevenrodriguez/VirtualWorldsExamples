@@ -10,19 +10,16 @@ This guide explains how to use the scripts in the `MudScripts` folder to build i
 ┌─ Foundation modules ──────────────────────────────────────────────────────┐
 │  MudGUI.js               — MudText and MudButton (GUI primitives)         │
 │  RaycastInteractorObject.js — RayInteractor (per-object hover/click)      │
-│  XRRays.js               — makeRayLine / updateRayLine (visible ray beams)│
 └───────────────────────────────────────────────────────────────────────────┘
                                     ↓ imported by
 ┌─ Scene setup modules ─────────────────────────────────────────────────────┐
-│  GUIElements.js          — creates the GUI elements (label, button, panel)│
-│  HelperFunctions.js      — utility functions (togglePanel)                │
-│  Interactables.js        — registers scene objects into shared Maps       │
+│  Interactables.js  — scene objects, GUI elements, Maps, initial state     │
 └───────────────────────────────────────────────────────────────────────────┘
                                     ↓ imported by
 ┌─ Input scripts ───────────────────────────────────────────────────────────┐
 │  MouseRaycast.js         — wires mouse input → interactors                │
 │  XRRaycast.js            — wires XR controller input → interactors        │
-│  XRRigMove.js            — moves the player rig with the left thumbstick  │
+│  XRRig.js                — XR startup/shutdown, ray lines, and locomotion │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -30,48 +27,40 @@ Scripts share values across files using `#pragma import` and `#pragma export` di
 
 ---
 
-## GUIElements.js
+## Scene Hierarchy
 
-This script creates all the GUI elements for the scene and stores them in a `Map` so any other script can look them up by name.
+The scene is organized in the editor as follows. Scripts are grouped under **Scripts**, and the interactive 3D objects live under **WorldObjects**.
 
-### Imports / Exports
-
-```js
-#pragma import (MudText, MudButton)   // uses the GUI primitives from MudGUI.js
-#pragma export (GUIElements)          // exposes the Map to other scripts
 ```
-
-### What it creates
-
-| Key | Type | Initial state | Description |
-|---|---|---|---|
-| `"statusLabel"` | `MudText` | Visible | A read-only text display panel |
-| `"actionButton"` | `MudButton` | Visible | A clickable button with hover styling |
-| `"infoPanel"` | `MudText` | **Hidden** | A secondary info panel, hidden until toggled |
-
-### Accessing elements from another script
-
-```js
-#pragma import (GUIElements)
-
-// Read-only labels
-const statusLabel = GUIElements.get("statusLabel");
-statusLabel.setText("Player entered the zone!");
-
-// Toggle the info panel
-const infoPanel = GUIElements.get("infoPanel");
-infoPanel.mesh.visible = true;   // show
-infoPanel.mesh.visible = false;  // hide
-
-// Get the button (see MudButton section for full usage)
-const actionButton = GUIElements.get("actionButton");
+MainExample
+├── Spawn_Point
+├── Scene_Preview_Camera
+├── Ambient_Light
+├── Nav_Mesh
+├── Scripts
+│   ├── RaycastInteractorObject     ← defines RayInteractor (foundation)
+│   ├── MudGUI                      ← defines MudText / MudButton (foundation)
+│   ├── Interactables               ← scene objects, GUI elements, Maps
+│   ├── XRSetup
+│   │   ├── XRRig                   ← XR startup, ray lines, locomotion
+│   │   └── XRRaycast               ← XR controller → interactor wiring
+│   └── MouseSetup
+│       └── MouseRaycast            ← mouse → interactor wiring
+└── WorldObjects
+    ├── cube
+    │   └── cubeText                ← label panel (toggled on cube click)
+    ├── sphere
+    │   └── sphereText              ← label panel (toggled on sphere hover)
+    ├── statusLabel                 ← MudText read-only display
+    ├── actionButton                ← MudButton (clickable)
+    └── infoPanel                   ← MudText panel (toggled on button click)
 ```
 
 ---
 
 ## MudGUI.js — GUI Primitives
 
-`MudGUI.js` defines two factory functions: `MudText` and `MudButton`. These are the building blocks used in `GUIElements.js`. You do not need to edit `MudGUI.js` directly — use the exported `GUIElements` Map in your scripts.
+`MudGUI.js` defines two factory functions: `MudText` and `MudButton`. These are the building blocks imported and used in `Interactables.js`. You do not need to edit `MudGUI.js` directly — use the exported `GUIElements` Map in your scripts.
 
 ### `MudText(options)` — Rendered text panel
 
@@ -224,35 +213,15 @@ rightBtnInteractor.update(rightRaycast, rPressed, rReleased);
 
 ---
 
-## HelperFunctions.js
-
-A small utility module exporting a single helper.
-
-### `togglePanel(panelObject)`
-
-Flips the visibility of any `THREE.Object3D`. If it is visible it becomes hidden; if hidden it becomes visible.
-
-```js
-#pragma import (togglePanel)
-
-togglePanel(ToggleObjects.get("cubeText"));  // show if hidden, hide if shown
-togglePanel(infoPanel.mesh);                 // works on MudText/MudButton meshes too
-```
-
-| Parameter | Type | Description |
-|---|---|---|
-| `panelObject` | `THREE.Object3D` | Any scene object |
-
----
-
 ## Interactables.js
 
-Finds objects in the scene by name and stores them in shared `Map`s so other scripts can access them without needing direct references.
+The single scene-setup module. It finds scene objects by name, creates all GUI elements, organises everything into shared `Map`s, and sets initial visibility state. Other scripts import from here rather than querying the scene directly.
 
-### Exports
+### Imports / Exports
 
 ```js
-#pragma export (RaycastObjects, ToggleObjects)
+#pragma import (MudText, MudButton)
+#pragma export (RaycastObjects, ToggleObjects, GUIElements)
 ```
 
 ### `RaycastObjects` — clickable/hoverable scene objects
@@ -262,14 +231,36 @@ RaycastObjects.get("cube")    // → THREE.Object3D
 RaycastObjects.get("sphere")  // → THREE.Object3D
 ```
 
-### `ToggleObjects` — UI panels that can be shown/hidden
+### `ToggleObjects` — label panels that can be shown/hidden
 
 ```js
 ToggleObjects.get("cubeText")    // → THREE.Object3D  (starts hidden)
 ToggleObjects.get("sphereText")  // → THREE.Object3D  (starts hidden)
 ```
 
-Both panels are hidden on startup — `Interactables.js` calls `togglePanel()` on each during initialization.
+Both panels start hidden — `Interactables.js` sets `.visible = false` on each during initialization.
+
+### `GUIElements` — GUI element map
+
+| Key | Type | Initial state | Description |
+|---|---|---|---|
+| `"statusLabel"` | `MudText` | Visible | A read-only text display panel |
+| `"actionButton"` | `MudButton` | Visible | A clickable button with hover styling |
+| `"infoPanel"` | `MudText` | **Hidden** | A secondary info panel, hidden until toggled |
+
+```js
+// Change the status text
+const statusLabel = GUIElements.get("statusLabel");
+statusLabel.setText("Player entered the zone!");
+
+// Show/hide the info panel
+const infoPanel = GUIElements.get("infoPanel");
+infoPanel.mesh.visible = true;
+infoPanel.mesh.visible = false;
+
+// Get the button
+const actionButton = GUIElements.get("actionButton");
+```
 
 ### Registering a new interactable object
 
@@ -342,7 +333,7 @@ The `_hit` argument in all callbacks is a Three.js intersection record. Key prop
 ### Full wiring example
 
 ```js
-#pragma import (RayInteractor, RaycastObjects, ToggleObjects, togglePanel, GUIElements)
+#pragma import (RayInteractor, RaycastObjects, ToggleObjects, GUIElements)
 #pragma lifecycle(startup, update, dispose)
 
 const domElement   = renderer.domElement;
@@ -353,7 +344,7 @@ const infoPanel    = GUIElements.get("infoPanel");
 const cubeInteractor = new RayInteractor(RaycastObjects.get("cube"));
 cubeInteractor.onEnter = (_hit) => { domElement.style.cursor = 'pointer'; };
 cubeInteractor.onExit  = (_hit) => { domElement.style.cursor = 'default'; };
-cubeInteractor.onClick = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
+cubeInteractor.onClick = (_hit) => { ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible; };
 
 // ── Sphere interactor ────────────────────────────────────────────────────────
 const sphereInteractor = new RayInteractor(RaycastObjects.get("sphere"));
@@ -403,40 +394,7 @@ function dispose() {
 
 ## XRRaycast.js
 
-The XR equivalent of `MouseRaycast.js` — connects **left and right XR controllers** to the interactable objects and draws a visible ray beam from each controller.
-
-### XR Ray Lines (from `XRRays.js`)
-
-Two helpers manage the visible laser-pointer lines:
-
-#### `makeRayLine(color, length)`
-
-Creates a Three.js `Line` object and adds it to the scene.
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `color` | `number` | `0x0000ff` | Hex color for the ray line |
-| `length` | `number` | `15` | Length of the ray in world units |
-
-Returns `{ line, length }`. Store the result and pass it to `updateRayLine` every frame.
-
-```js
-const leftRay  = makeRayLine(0x0000FF);  // blue
-const rightRay = makeRayLine(0xFF0000);  // red
-```
-
-#### `updateRayLine(rayLine, raycast)`
-
-Updates the line's start and end points to match a controller's current position and direction. Call once per frame per controller.
-
-| Parameter | Type | Description |
-|---|---|---|
-| `rayLine` | `{ line, length }` | The object returned by `makeRayLine` |
-| `raycast` | raycast object | The controller's raycast data from `Input.xr.raycast(i)` |
-
-```js
-updateRayLine(leftRay, raycast);
-```
+Connects **left and right XR controllers** to the interactable objects. This script handles interaction only — XR startup/shutdown and ray line rendering are managed by `XRRig.js`.
 
 ### XR Controller Input API
 
@@ -459,26 +417,24 @@ Because there are two controllers, each scene object needs **two** `RayInteracto
 const leftInteractor  = new RayInteractor(RaycastObjects.get("cube"));
 const rightInteractor = new RayInteractor(RaycastObjects.get("cube"));
 
-leftInteractor.onClick  = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
-rightInteractor.onClick = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
+leftInteractor.onClick  = (_hit) => { ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible; };
+rightInteractor.onClick = (_hit) => { ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible; };
 ```
 
 ### Full wiring example
 
 ```js
-#pragma import (makeRayLine, updateRayLine, RayInteractor, RaycastObjects, ToggleObjects, togglePanel, GUIElements)
+#pragma import (RayInteractor, RaycastObjects, ToggleObjects, GUIElements)
 #pragma lifecycle(startup, update, dispose)
 
-let leftRay  = null;
-let rightRay = null;
 const controllers = { left: null, right: null, leftIndex: -1, rightIndex: -1 };
 
 // ── Cube: one interactor per hand ────────────────────────────────────────────
 const leftInteractor  = new RayInteractor(RaycastObjects.get("cube"));
 const rightInteractor = new RayInteractor(RaycastObjects.get("cube"));
 
-leftInteractor.onClick  = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
-rightInteractor.onClick = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
+leftInteractor.onClick  = (_hit) => { ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible; };
+rightInteractor.onClick = (_hit) => { ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible; };
 
 // ── Sphere: change color on hover ────────────────────────────────────────────
 const leftSphereInteractor  = new RayInteractor(RaycastObjects.get("sphere"));
@@ -491,21 +447,19 @@ rightSphereInteractor.onExit  = (_hit) => { _hit.object.material.color.set(0xfff
 
 // ── Button: standalone interactors call hover()/unhover() manually ───────────
 const actionButton       = GUIElements.get("actionButton");
+const infoPanel          = GUIElements.get("infoPanel");
 const leftBtnInteractor  = new RayInteractor(actionButton.mesh);
 const rightBtnInteractor = new RayInteractor(actionButton.mesh);
 
 leftBtnInteractor.onEnter  = (_hit) => { actionButton.hover(); };
 leftBtnInteractor.onExit   = (_hit) => { actionButton.unhover(); };
-leftBtnInteractor.onClick  = (_hit) => { console.log('clicked'); };
+leftBtnInteractor.onClick  = (_hit) => { infoPanel.mesh.visible = !infoPanel.mesh.visible; };
 rightBtnInteractor.onEnter = (_hit) => { actionButton.hover(); };
 rightBtnInteractor.onExit  = (_hit) => { actionButton.unhover(); };
-rightBtnInteractor.onClick = (_hit) => { console.log('clicked'); };
+rightBtnInteractor.onClick = (_hit) => { infoPanel.mesh.visible = !infoPanel.mesh.visible; };
 
-function startup() {
-    Input.xr.start();
-    leftRay  = makeRayLine(0x0000FF);  // blue ray for left controller
-    rightRay = makeRayLine(0xFF0000);  // red  ray for right controller
-}
+// XR input is started by XRRig.js — no startup/dispose needed here
+function startup() {}
 
 function update() {
     if (Input.xr.count() < 1) return;
@@ -517,20 +471,11 @@ function update() {
         const raycast = Input.xr.raycast(i);
         const hand    = Input.xr.handedness(i);
 
-        if (hand === 'left') {
-            controllers.left      = raycast;
-            controllers.leftIndex = i;
-            updateRayLine(leftRay, raycast);
-        }
-        if (hand === 'right') {
-            controllers.right      = raycast;
-            controllers.rightIndex = i;
-            updateRayLine(rightRay, raycast);
-        }
+        if (hand === 'left')  { controllers.left      = raycast; controllers.leftIndex  = i; }
+        if (hand === 'right') { controllers.right     = raycast; controllers.rightIndex = i; }
     }
 
     if (controllers.left) {
-        // Sync the raycaster with the controller's current position and direction
         controllers.left.raycaster.ray.origin.copy(controllers.left.position);
         controllers.left.raycaster.ray.direction.copy(controllers.left.direction).normalize();
 
@@ -554,28 +499,34 @@ function update() {
 }
 
 function dispose() {
-    Input.xr.stop();
     leftInteractor.reset();       rightInteractor.reset();
     leftSphereInteractor.reset(); rightSphereInteractor.reset();
     leftBtnInteractor.reset();    rightBtnInteractor.reset();
-
-    if (leftRay?.line)  scene?.remove(leftRay.line);
-    if (rightRay?.line) scene?.remove(rightRay.line);
 }
 ```
 
+> **Note:** `XRRaycast.js` does not call `Input.xr.start()` or `Input.xr.stop()`. That is handled entirely by `XRRig.js`. Similarly, ray line creation and updates live in `XRRig.js`.
+
 ---
 
-## XRRigMove.js
+## XRRig.js
 
-Moves the player through the scene using the **left thumbstick**. Movement direction is always relative to where the headset is facing, and vertical movement is suppressed so the player stays on the ground.
+Owns **XR session management**, **visible ray lines**, and **left-thumbstick locomotion**. This is a combined script — it is the authoritative owner of the XR input lifecycle for the project.
+
+### Exports
+
+```js
+#pragma export (makeRayLine, updateRayLine)
+```
+
+These are exported so other scripts can call them if needed, but in normal usage `XRRig.js` manages the ray lines internally.
 
 ### Lifecycle
 
 ```
-startup(delta)  → empty, reserved for future setup
-update(delta)   → called every frame — reads thumbstick axes and moves the rig
-dispose()       → empty, reserved for future cleanup
+startup()   → starts XR input, creates left (blue) and right (red) ray lines
+update(delta) → manages ray visibility, updates ray positions, moves player rig
+dispose()   → stops XR input, removes ray lines from the scene
 ```
 
 > `delta` is the time in seconds since the last frame. Multiplying speed by `delta` makes movement frame-rate independent.
@@ -584,7 +535,15 @@ dispose()       → empty, reserved for future cleanup
 
 ```js
 const MOVE_SPEED = 2.0;  // world units per second — edit this to change movement speed
+const RAY_LENGTH = 15;   // length of each controller ray line in world units
 ```
+
+### Ray line visibility
+
+Both ray lines default to **hidden** at the start of every frame. A line is only made visible if that hand's controller appears in the `Input.xr.count()` scan during that frame. This means:
+
+- If a controller disconnects or drops out of tracking, its ray disappears automatically the next frame.
+- There is no explicit visibility API in the XR input system — controller presence is the only available signal.
 
 ### How movement is calculated
 
@@ -661,11 +620,12 @@ const MOVE_SPEED = 1.0;  // slower
 ### Show/hide a panel on click
 
 ```js
+// Toggle a ToggleObjects panel
 interactor.onClick = (_hit) => {
-    togglePanel(ToggleObjects.get("cubeText"));
+    ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible;
 };
 
-// or toggle a MudText panel directly:
+// Toggle a MudText/MudButton panel
 interactor.onClick = (_hit) => {
     infoPanel.mesh.visible = !infoPanel.mesh.visible;
 };
@@ -710,4 +670,4 @@ myBoxInteractor.update(mouseRaycast, isPressed, isReleased);
 myBoxInteractor.reset();
 ```
 
-4. For XR, add a left and right interactor following the same pattern in `XRRaycast.js`.
+4. For XR, add a left and right interactor in `XRRaycast.js`. `XRRig.js` handles XR startup and ray lines automatically — you only need to add the interactor logic.
