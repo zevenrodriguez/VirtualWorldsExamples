@@ -2,15 +2,14 @@
 #pragma lifecycle(startup, update, dispose)
 
 const domElement   = renderer.domElement;
-const actionButton = GUIElements.get("actionButton");
-const infoPanel    = GUIElements.get("infoPanel");
+
 
 // ─── Cube interactor ──────────────────────────────────────────────────────────
 const cubeInteractor = new RayInteractor(RaycastObjects.get("cube"));
 
 cubeInteractor.onEnter = (_hit) => { domElement.style.cursor = 'pointer'; };
 cubeInteractor.onExit  = (_hit) => { domElement.style.cursor = 'default'; };
-cubeInteractor.onClick = (_hit) => { togglePanel(ToggleObjects.get("cubeText")); };
+cubeInteractor.onClick = (_hit) => { ToggleObjects.get("cubeText").visible = !ToggleObjects.get("cubeText").visible; };
 
 // ─── Sphere interactor ────────────────────────────────────────────────────────
 const sphere           = RaycastObjects.get("sphere");
@@ -28,6 +27,8 @@ sphereInteractor.onExit = (_hit) => {
 };
 
 // ─── Button interactor ────────────────────────────────────────────────────────
+const actionButton = GUIElements.get("actionButton");
+const infoPanel    = GUIElements.get("infoPanel");
 actionButton._interactor.onEnter = (_hit) => { actionButton.hover();   domElement.style.cursor = 'pointer'; };
 actionButton._interactor.onExit  = (_hit) => { actionButton.unhover(); domElement.style.cursor = 'default'; };
 actionButton.onClick             = (_hit) => { infoPanel.mesh.visible = !infoPanel.mesh.visible; };

@@ -1,4 +1,5 @@
-#pragma import (togglePanel);
+#pragma import (MudText, MudButton)
+
 
 /*
  * Interactable Objects Module
@@ -42,12 +43,48 @@ const ToggleObjects = new Map();
 ToggleObjects.set("cubeText", cubeTextPanel);
 ToggleObjects.set("sphereText", sphereTextPanel);
 
-
-
 // ─── Initialize ──────────────────────────────────────────────────────────────
 // Hide the text panels when the scene starts
-togglePanel(cubeTextPanel);
-togglePanel(sphereTextPanel);
 
-#pragma export (RaycastObjects, ToggleObjects);
+cubeTextPanel.visible = false;
+sphereTextPanel.visible = false;
+
+// ─── Create GUI elements ──────────────────────────────────────────────────────
+const statusLabel = MudText({
+    sceneMesh:       cast(scene.getObjectByName("statusLabel"), THREE.Mesh),
+    text:            'This is a MudText Box. This is a MudText Box. This is a MudText Box.',
+    textColor:       '#ffffff',
+    backgroundColor: '#111111',
+    borderColor:     '#444444',
+});
+
+const actionButton = MudButton({
+    sceneMesh:            cast(scene.getObjectByName("actionButton"), THREE.Mesh),
+    text:                 'Hello!',
+    textColor:            '#ffffff',
+    backgroundColor:      '#2255cc',
+    hoverBackgroundColor: '#4477ff',
+    borderColor:          '#99bbff',
+    hoverBorderColor:     '#ffffff',
+});
+
+// ─── Info panel (hidden by default) ──────────────────────────────────────────
+const infoPanel = MudText({
+    sceneMesh:       cast(scene.getObjectByName("infoPanel"), THREE.Mesh),
+    text:            'Hello from MudGUI! Hello from MudGUI! Hello from MudGUI! Hello from MudGUI! ',
+    textColor:       '#ffffff',
+    backgroundColor: '#1a3a1a',
+    borderColor:     '#44aa44',
+});
+
+infoPanel.mesh.visible = false;
+
+// ─── Store in map for shared access ──────────────────────────────────────────
+const GUIElements = new Map();
+GUIElements.set("statusLabel", statusLabel);
+GUIElements.set("actionButton", actionButton);
+GUIElements.set("infoPanel",    infoPanel);
+
+
+#pragma export (RaycastObjects, ToggleObjects, GUIElements);
 
