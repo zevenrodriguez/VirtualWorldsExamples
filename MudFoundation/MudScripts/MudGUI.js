@@ -143,6 +143,12 @@ function MudText(options) {
             opts.text = text;
             draw(opts.backgroundColor, opts.borderColor);
         },
+        dispose: function() {
+            scene.remove(mesh);
+            mesh.geometry.dispose();
+            if (mesh.material.map) mesh.material.map.dispose();
+            mesh.material.dispose();
+        },
         _draw: draw,
         _opts: opts,
     };
@@ -194,6 +200,9 @@ function MudButton(options) {
         reset: function() {
             interactor.reset();
             base._draw(normalBg, normalBorder);
+        },
+        dispose: function() {
+            base.dispose();
         },
     };
 

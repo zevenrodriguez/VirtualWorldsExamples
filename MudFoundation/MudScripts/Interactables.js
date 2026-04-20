@@ -1,4 +1,5 @@
 #pragma import (MudText, MudButton)
+#pragma lifecycle(dispose)
 
 
 /*
@@ -85,6 +86,18 @@ GUIElements.set("statusLabel", statusLabel);
 GUIElements.set("actionButton", actionButton);
 GUIElements.set("infoPanel",    infoPanel);
 
+
+// ─── Dispose ──────────────────────────────────────────────────────────────────
+// Called automatically by MUD when leaving the verse.
+// Cleans up all GUI elements so they don't persist across verse transitions.
+function dispose() {
+    GUIElements.forEach(function(element) {
+        if (element && typeof element.dispose === 'function') {
+            element.dispose();
+        }
+    });
+    GUIElements.clear();
+}
 
 #pragma export (RaycastObjects, ToggleObjects, GUIElements);
 
