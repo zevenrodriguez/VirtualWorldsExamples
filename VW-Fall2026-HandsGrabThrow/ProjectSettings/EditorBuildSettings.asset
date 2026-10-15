@@ -1,0 +1,14 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/GrabAndThrow.unity
+    guid: 87e0c6891ed000a4396671aacee80bc4
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: ca5082ce8d7ad6b46bb4834d282bdcdd, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 697fc1e2b89a8c1469b7e9be5c396c64, type: 2}
